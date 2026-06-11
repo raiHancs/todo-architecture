@@ -1,0 +1,103 @@
+{
+  "version": "2",
+  "dialect": "mssql",
+  "id": "dbe5158b-9212-486a-b6cf-9f3019e18a9d",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "todos",
+      "entityType": "tables",
+      "schema": "dbo"
+    },
+    {
+      "type": "uniqueidentifier",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "schema": "dbo",
+      "entityType": "columns",
+      "table": "todos"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "schema": "dbo",
+      "entityType": "columns",
+      "table": "todos"
+    },
+    {
+      "type": "bit",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "name": "is_completed",
+      "schema": "dbo",
+      "entityType": "columns",
+      "table": "todos"
+    },
+    {
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "name": "position",
+      "schema": "dbo",
+      "entityType": "columns",
+      "table": "todos"
+    },
+    {
+      "type": "datetime2",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "schema": "dbo",
+      "entityType": "columns",
+      "table": "todos"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "name": "todos_pkey",
+      "table": "todos",
+      "schema": "dbo",
+      "entityType": "pks"
+    },
+    {
+      "column": "is_completed",
+      "nameExplicit": false,
+      "default": "((0))",
+      "name": "todos_is_completed_default",
+      "entityType": "defaults",
+      "schema": "dbo",
+      "table": "todos"
+    },
+    {
+      "column": "position",
+      "nameExplicit": false,
+      "default": "((0))",
+      "name": "todos_position_default",
+      "entityType": "defaults",
+      "schema": "dbo",
+      "table": "todos"
+    },
+    {
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(GETDATE())",
+      "name": "todos_created_at_default",
+      "entityType": "defaults",
+      "schema": "dbo",
+      "table": "todos"
+    }
+  ],
+  "renames": []
+}
