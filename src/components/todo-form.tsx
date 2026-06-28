@@ -14,9 +14,12 @@ export function TodoForm() {
     setErrors([]);
     
     const rawData = { title: formData.get("title") };
+
     const response = await createTodo(rawData);
 
     setIsPending(false);
+
+    console.log(response);
 
     if (response?.error) {
       setErrors(response.error.title || []);

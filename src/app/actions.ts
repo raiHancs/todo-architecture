@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { todos } from "@/lib/db/schema";
 import { todoSchema } from "@/lib/schema"; // Your Zod validation schema
-import { eq, desc, asc, sql } from "drizzle-orm";
+import { eq, desc, asc, sql, inArray } from "drizzle-orm";
 
 // Query: Fetch from SQL
 export async function getTodos() {
@@ -25,6 +25,7 @@ export async function createTodo(formData: unknown) {
     position: sql`(SELECT COALESCE(MAX(position), -1) + 1 FROM ${todos})`,
   });
 
+
   revalidatePath("/");
   return { success: true };
 }
@@ -35,6 +36,16 @@ export async function toggleTodoStatus(id: string, isCompleted: boolean) {
     .update(todos)
     .set({ isCompleted })
     .where(eq(todos.id, id));
+
+  revalidatePath("/");
+}
+
+// New Bulk Update Mutation for Select All functionality
+export async function toggleMultipleTodos(ids: string[], isCompleted: boolean) {
+  await db
+    .update(todos)
+    .set({ isCompleted })
+    .where(inArray(todos.id, ids));
 
   revalidatePath("/");
 }

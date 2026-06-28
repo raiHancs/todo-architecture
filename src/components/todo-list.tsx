@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { DbTodo } from "@/lib/db/schema";
-import { updateTodoOrder } from "@/app/actions";
+import { updateTodoOrder, toggleMultipleTodos } from "@/app/actions";
 import { TodoItem } from "./todo-item";
 
 interface TodoListProps {
@@ -13,6 +13,33 @@ interface TodoListProps {
 export function TodoList({ initialTodos }: TodoListProps) {
   const [items, setItems] = useState<DbTodo[]>(initialTodos);
   const [isPending, startTransition] = useTransition();
+
+  const allChecked = useMemo(() => items.every((item) => item.isCompleted), [items]);
+  const someChecked = useMemo(() => items.some((item) => item.isCompleted) && !allChecked, [items,allChecked]);
+
+  const handleSelectAllChange = () => {
+    const targetChecked = !allChecked;
+    
+    // Optimistic Update
+    const updatedItems = items.map((item) => ({
+      ...item,
+      isCompleted: targetChecked,
+    }));
+    
+    setItems(updatedItems);
+    
+    // Batch Updates
+    startTransition(async () => {
+      // Find all IDs that need to be updated
+      const idsToUpdate = updatedItems
+        .filter((item) => item.isCompleted === targetChecked)
+        .map((item) => item.id);
+      
+      if (idsToUpdate.length > 0) {
+        await toggleMultipleTodos(idsToUpdate, targetChecked);
+      }
+    });
+  }
 
   // Keep local state synchronized if server components trigger a revalidation bypass
   useEffect(() => {
@@ -47,7 +74,23 @@ export function TodoList({ initialTodos }: TodoListProps) {
   }
 
   return (
-    <DragDropContext onDragEnd={handleOnDragEnd}>
+    <>
+      <label className="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <input
+          type="checkbox"
+          checked={allChecked}
+          // React hook trick to apply indeterminate state directly in TSX
+          ref={(el) => {
+            if (el) el.indeterminate = someChecked;
+          }}
+          onChange={handleSelectAllChange}
+          className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
+        />
+        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {allChecked ? 'Unselect All' : 'Select All Tasks'}
+        </span>
+      </label>
+      <DragDropContext onDragEnd={handleOnDragEnd}>
       <Droppable droppableId="todos-list">
         {(provided) => (
           <div 
@@ -78,5 +121,6 @@ export function TodoList({ initialTodos }: TodoListProps) {
         )}
       </Droppable>
     </DragDropContext>
+    </>
   );
 }
